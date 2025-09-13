@@ -9,6 +9,7 @@
  */
 
 import type * as private_conversations from "../private/conversations.js";
+import type * as private_messages from "../private/messages.js";
 import type * as public_contactSessions from "../public/contactSessions.js";
 import type * as public_conversations from "../public/conversations.js";
 import type * as public_messages from "../public/messages.js";
@@ -34,6 +35,7 @@ import type {
  */
 declare const fullApi: ApiFromModules<{
   "private/conversations": typeof private_conversations;
+  "private/messages": typeof private_messages;
   "public/contactSessions": typeof public_contactSessions;
   "public/conversations": typeof public_conversations;
   "public/messages": typeof public_messages;

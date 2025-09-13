@@ -29,6 +29,9 @@ importers:
       '@clerk/nextjs':
         specifier: ^6.31.6
         version: 6.31.6(next@15.4.5(@babel/core@7.28.3)(@opentelemetry/api@1.9.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      '@convex-dev/agent':
+        specifier: ^0.1.16
+        version: 0.1.18(ai@4.3.19(react@19.1.1)(zod@3.25.76))(convex-helpers@0.1.104(@standard-schema/spec@1.0.0)(convex@1.26.2(@clerk/clerk-react@5.45.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)(typescript@5.9.2)(zod@3.25.76))(convex@1.26.2(@clerk/clerk-react@5.45.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1))(react@19.1.1)
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.1))
