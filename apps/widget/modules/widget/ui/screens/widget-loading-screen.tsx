@@ -2,7 +2,7 @@
 
 import { useAtomValue, useSetAtom } from "jotai";
 import { LoaderIcon } from "lucide-react";
-import { contactSessionIdAtomFamily, errorMessageAtom, loadingMessageAtom, organizationIdAtom, screenAtom, widgetSettingsAtom } from "@/modules/widget/atoms/widget-atom";
+import { contactSessionIdAtomFamily, errorMessageAtom, loadingMessageAtom, organizationIdAtom, screenAtom, vapiSecretsAtom, widgetSettingsAtom } from "@/modules/widget/atoms/widget-atom";
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
 import { useEffect, useState } from "react";
 import { useAction, useMutation, useQuery } from "convex/react";
@@ -19,7 +19,8 @@ export const WidgetLoadingScreen = ({ organizationId }: { organizationId: string
     const setOrganizationId = useSetAtom(organizationIdAtom);
     const setLoadingMessage = useSetAtom(loadingMessageAtom);
     const setErrorMessage = useSetAtom(errorMessageAtom);
-    const setSCreen = useSetAtom(screenAtom);
+    const setScreen = useSetAtom(screenAtom);
+    const setVapiSecrets = useSetAtom(vapiSecretsAtom)
 
     const contactSessionId = useAtomValue(contactSessionIdAtomFamily(organizationId || ""));
 
@@ -33,7 +34,7 @@ export const WidgetLoadingScreen = ({ organizationId }: { organizationId: string
 
         if (!organizationId) {
             setErrorMessage("Organization ID is required");
-            setSCreen("error")
+            setScreen("error")
             return;
         }
 
@@ -46,14 +47,14 @@ export const WidgetLoadingScreen = ({ organizationId }: { organizationId: string
                     setStep("session");
                 } else {
                     setErrorMessage(result.reason || "Invalid Configuration");
-                    setSCreen("error")
+                    setScreen("error")
                 }
             })
             .catch(() => {
                 setErrorMessage("Unable to validate organization");
-                setSCreen("error")
+                setScreen("error")
             })
-    }, [step, organizationId, setErrorMessage, setSCreen, setOrganizationId, setStep, validateOrganization, setLoadingMessage]);
+    }, [step, organizationId, setErrorMessage, setScreen, setOrganizationId, setStep, validateOrganization, setLoadingMessage]);
 
     const validateContactSession = useMutation(api.public.contactSessions.validate);
     useEffect(() => {
@@ -100,7 +101,7 @@ export const WidgetLoadingScreen = ({ organizationId }: { organizationId: string
 
         if(widgetSettings !== undefined) {
             setWidgetSettings(widgetSettings);
-            setStep("done");
+            setStep("vapi");
         }
     }, [
         step,
@@ -110,14 +111,46 @@ export const WidgetLoadingScreen = ({ organizationId }: { organizationId: string
         setLoadingMessage,
     ])
 
+    // step 4: load vapi secrets
+    const getVapiSecrets = useAction(api.public.secrets.getVapiSecrets);
+    useEffect(() => {
+        if (step !== "vapi") {
+            return;
+        }
+
+        if (!organizationId) {
+            setErrorMessage("Organization ID is required");
+            setScreen("error")
+            return;
+        }
+
+        setLoadingMessage("Loading voice features...");
+        getVapiSecrets({ organizationId })
+            .then((secrets) => {
+                setVapiSecrets(secrets);
+                setStep("done");
+            })
+            .catch(() => {
+                setVapiSecrets(null);
+                setStep("done");
+            })
+    }, [
+        step,
+        organizationId,
+        getVapiSecrets,
+        setVapiSecrets,
+        setStep,
+        setLoadingMessage,
+    ])
+
     useEffect(() => {
         if (step !== "done") {
             return;
         }
 
         const hasValidSession = contactSessionId && sessionValid;
-        setSCreen(hasValidSession ? "selection" : "auth");
-    }, [step, contactSessionId, sessionValid, setSCreen]);
+        setScreen(hasValidSession ? "selection" : "auth");
+    }, [step, contactSessionId, sessionValid, setScreen]);
 
 
     return (
