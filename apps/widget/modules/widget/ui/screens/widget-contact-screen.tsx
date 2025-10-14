@@ -3,7 +3,7 @@ import { Button } from "@workspace/ui/components/button";
 import { WidgetHeader } from "../components/widget-header";
 import { useAtomValue, useSetAtom } from "jotai";
 import { screenAtom, widgetSettingsAtom } from "../../atoms/widget-atom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export const WidgetContactScreen = () => {
@@ -13,6 +13,16 @@ export const WidgetContactScreen = () => {
     const phoneNumber = widgetSettings?.vapiSettings?.phoneNumber;
 
     const [copied, setCopied] = useState(false)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
+        }
+    }, [])
+
     const handleCopy = async () => {
         if (!phoneNumber) {
             return;
@@ -25,7 +35,7 @@ export const WidgetContactScreen = () => {
         } catch (error) {
             console.error(error)
         } finally {
-            setTimeout(() => setCopied(false), 2000)
+            timeoutRef.current = setTimeout(() => setCopied(false), 2000)
         }
     }
 
@@ -43,13 +53,19 @@ export const WidgetContactScreen = () => {
                     <p>Contact Us</p>
                 </div>
             </WidgetHeader>
-            <div className="flex h-full flex-col items-center justify-center gap-y-4">
-                <div className="flex items-center justify-center rounded-full border bg-white p-3">
-                    <PhoneIcon className="size-6 text-muted-foreground" />
+            {!phoneNumber ? (
+                <div className="flex h-full flex-col items-center justify-center gap-y-4">
+                    <p className="text-muted-foreground">Contact information not available</p>
                 </div>
-                <p className="text-muted-foreground">Available 24/7</p>
-                <p className="font-bold text-2xl">{phoneNumber}</p>
-            </div>
+            ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-y-4">
+                    <div className="flex items-center justify-center rounded-full border bg-white p-3">
+                        <PhoneIcon className="size-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-muted-foreground">Available 24/7</p>
+                    <p className="font-bold text-2xl">{phoneNumber}</p>
+                </div>
+            )}
             <div className="border-t bg-background p-4">
                 <Button
                     className="w-full"
@@ -69,7 +85,7 @@ export const WidgetContactScreen = () => {
                         </>
                     )}
                 </Button>
-                <Button asChild className="w-full" size="lg">
+                <Button asChild className="w-full" size="lg" disabled={!phoneNumber}>
                     <Link href={`tel:${phoneNumber}`}>
                         <PhoneIcon />
                         Call Now
